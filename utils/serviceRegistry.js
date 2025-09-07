@@ -20,7 +20,7 @@ class ServiceRegistry {
         consecutiveFailures: 0
       });
     });
-    logger.info('Service registry initialized', {
+    logger.info('Service registry initialized ✔', {
       services: Array.from(this.services.keys())
     });
   }
@@ -41,7 +41,7 @@ class ServiceRegistry {
         });
         
         if (wasUnhealthy) {
-          logger.info(`Service ${serviceName} is back online`);
+          logger.info(`Service ${serviceName} is back online ♻♻♻`);
         }
         return true;
       }
@@ -58,7 +58,7 @@ class ServiceRegistry {
       });
       
       if (consecutiveFailures === 1) {
-        logger.warn(`Service ${serviceName} health check failed:`, {
+        logger.warn(`Service ${serviceName} health check failed ❌:`, {
           error: error.message,
           url: serviceConfig.url
         });
@@ -71,7 +71,7 @@ class ServiceRegistry {
   }
 
   startHealthChecks() {
-    logger.info('Starting health checks for all services');
+    logger.info('Starting health checks for all services ❕');
     setInterval(async () => {
       for (const [serviceName, serviceConfig] of this.services) {
         await this.checkServiceHealth(serviceName, serviceConfig);
