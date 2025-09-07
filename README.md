@@ -1,6 +1,6 @@
 # API Gateway - WanderLanka
 
-Enterprise-grade API Gateway for WanderLanka microservices architecture.
+API Gateway for WanderLanka microservices architecture.
 
 ## Features
 
@@ -197,6 +197,3 @@ Comprehensive error handling with:
 ✅ **Maintainability**: Modular structure, configuration management  
 ✅ **Scalability**: Horizontal scaling ready, load balancer friendly  
 
-## License
-
-ISC License - see LICENSE file for details.
