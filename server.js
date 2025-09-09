@@ -3,10 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import logger from './utils/logger.js';
 import { server, cors } from './config/index.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import { generalLimiter } from './middleware/rateLimiter.js';
-import corsMiddleware from './middleware/cors.js';
-import loggerMiddleware from './middleware/logger.js';
+import { errorHandler, notFoundHandler, generalLimiter, corsMiddleware, requestLogger } from './middleware/index.js';
 import healthRoutes from './routes/health.js';
 import proxyRoutes from './routes/proxyRoutes.js';
 
@@ -32,7 +29,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware
-app.use(loggerMiddleware);
+app.use(requestLogger);
 
 // Welcome route
 app.get('/', (req, res) => {

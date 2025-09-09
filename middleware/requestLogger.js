@@ -1,7 +1,7 @@
 // middleware/logger.js
 import logger from '../utils/logger.js';
 
-export default (req, res, next) => {
+const requestLogger = (req, res, next) => {
   const start = Date.now();
   
   // Log incoming request
@@ -42,3 +42,5 @@ export default (req, res, next) => {
 
   next();
 };
+
+export default requestLogger;

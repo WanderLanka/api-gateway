@@ -2,8 +2,7 @@
 import express from 'express';
 import createServiceProxy from '../proxy/createServiceProxy.js';
 import { services } from '../config/index.js';
-import { authLimiter, strictLimiter } from '../middleware/rateLimiter.js';
-import { authenticateToken, optionalAuth } from '../middleware/auth.js';
+import { authLimiter, strictLimiter, authenticateToken, optionalAuth } from '../middleware/index.js';
 
 const router = express.Router();
 
