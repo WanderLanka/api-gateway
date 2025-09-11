@@ -24,15 +24,11 @@ app.use(corsMiddleware);
 // Rate limiting (general)
 app.use(generalLimiter);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 // Request logging middleware
 app.use(requestLogger);
 
-// Welcome route
-app.get('/', (req, res) => {
+// Welcome route (with JSON parsing only for this route)
+app.get('/', express.json(), (req, res) => {
   res.json({
     success: true,
     message: 'WanderLanka API Gateway',
@@ -46,9 +42,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Routes
-app.use('/health', healthRoutes);
-app.use('/api', proxyRoutes);
+// Routes (apply JSON parsing only to gateway's own routes)
+app.use('/health', express.json(), healthRoutes);
+app.use('/api', proxyRoutes); // NO JSON parsing - let proxy handle it
 
 // 404 handler
 app.use(notFoundHandler);
@@ -80,7 +76,7 @@ app.listen(PORT, HOST, () => {
     mobileApp: cors.origins[1],
     endpoints: {
       web: `http://localhost:${PORT}`,
-      network: `http://192.168.8.159:${PORT}`,
+      network: `http://10.21.88.227:${PORT}`,
       health: `http://localhost:${PORT}/health`,
       healthDetailed: `http://localhost:${PORT}/health/detailed`
     }

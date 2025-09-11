@@ -3,137 +3,63 @@ import logger from '../utils/logger.js';
 import serviceRegistry from '../utils/serviceRegistry.js';
 
 function createServiceProxy(serviceName, targetUrl) {
-  logger.info(`Creating proxy for ${serviceName}`, { target: targetUrl });
-  
-  // Create a middleware that checks health before proxying
+  logger.info(`🛠 Proxy for ${serviceName} → ${targetUrl}`);
+
+  // Create the proxy middleware once
+  const proxyMiddleware = createProxyMiddleware({
+    target: targetUrl,
+    changeOrigin: true,
+    secure: false,
+    timeout: 30000,
+    logLevel: 'debug',
+    pathRewrite: {
+      [`^/api/${serviceName.toLowerCase()}`]: '', // Remove /api/auth prefix
+    },
+    onProxyReq: (proxyReq, req) => {
+      logger.info(`📤Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
+    },
+    onProxyRes: (proxyRes) => {
+      logger.info(`📥 Response ${proxyRes.statusCode} from ${serviceName}`);
+    },
+    onError: (err, req, res) => {
+      logger.error(`❌ Proxy error for ${serviceName}: ${err.message}`);
+      const service = serviceRegistry.getService(serviceName.toLowerCase());
+      if (service) {
+        serviceRegistry.services.set(serviceName.toLowerCase(), {
+          ...service,
+          healthy: false,
+          lastError: err.message,
+          lastCheck: new Date()
+        });
+      }
+      if (!res.headersSent) {
+        res.status(503).json({
+          success: false,
+          error: 'Service unavailable',
+          service: serviceName,
+          code: 'SERVICE_PROXY_ERROR',
+          message: err.code === 'ECONNREFUSED' ? '🚫 Service is down' : err.message
+        });
+      }
+    }
+  });
+
+  // Return the actual request handler
   return (req, res, next) => {
-    // Check if service is healthy before proxying
     if (!serviceRegistry.isServiceHealthy(serviceName.toLowerCase())) {
-      logger.warn(`Rejecting request to unhealthy service: ${serviceName}`, {
-        service: serviceName,
-        url: req.originalUrl,
-        method: req.method
-      });
-      
+      logger.warn(`⚠️ ${serviceName} is unhealthy. Request rejected.`);
       return res.status(503).json({
         success: false,
-        error: 'Service temporarily unavailable',
+        error: 'Service unavailable',
         service: serviceName,
-        code: 'SERVICE_UNHEALTHY',
-        message: `${serviceName} service is currently unhealthy`,
-        timestamp: new Date().toISOString(),
-        retryAfter: 30 // seconds
+        code: 'SERVICE_UNHEALTHY'
       });
     }
 
-    // Service is healthy, create and use the proxy
-    const proxy = createProxyMiddleware({
-      target: targetUrl,
-      changeOrigin: true,
-      secure: false,
-      timeout: 30000,
-      onProxyReq: (proxyReq, req, res) => {
-        logger.debug(`Routing to ${serviceName}`, {
-          service: serviceName,
-          target: `${targetUrl}${req.url}`,
-          method: req.method,
-          originalUrl: req.originalUrl,
-          proxyUrl: req.url
-        });
-        
-        // Handle body for POST/PUT/PATCH requests
-        if (req.body && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
-          const bodyData = JSON.stringify(req.body);
-          proxyReq.setHeader('Content-Type', 'application/json');
-          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-          proxyReq.write(bodyData);
-          logger.debug(`Forwarding body to ${serviceName}`, {
-            bodySize: Buffer.byteLength(bodyData)
-          });
-        }
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        logger.info(`Response from ${serviceName}`, {
-          service: serviceName,
-          status: proxyRes.statusCode,
-          statusMessage: proxyRes.statusMessage,
-          method: req.method,
-          url: req.originalUrl,
-          responseHeaders: {
-            contentType: proxyRes.headers['content-type'],
-            contentLength: proxyRes.headers['content-length']
-          }
-        });
-        
-        // Mark service as healthy on successful response
-        if (proxyRes.statusCode < 500) {
-          const service = serviceRegistry.getService(serviceName.toLowerCase());
-          if (service && !service.healthy) {
-            serviceRegistry.services.set(serviceName.toLowerCase(), {
-              ...service,
-              healthy: true,
-              lastError: null,
-              lastCheck: new Date()
-            });
-            logger.info(`Service ${serviceName} marked as healthy again`);
-          }
-        }
-        
-        // Log response body for debugging (first 500 characters) in development
-        if (process.env.NODE_ENV === 'development') {
-          let body = '';
-          proxyRes.on('data', chunk => {
-            body += chunk;
-          });
-          proxyRes.on('end', () => {
-            if (body && body.length > 0) {
-              const truncatedBody = body.length > 500 ? body.substring(0, 500) + '...' : body;
-              logger.debug(`Response body from ${serviceName}`, {
-                service: serviceName,
-                bodyPreview: truncatedBody
-              });
-            }
-          });
-        }
-      },
-      onError: (err, req, res) => {
-        logger.error(`Proxy error from ${serviceName}`, {
-          service: serviceName,
-          error: err.message,
-          code: err.code,
-          target: targetUrl,
-          method: req.method,
-          url: req.originalUrl,
-          stack: err.stack
-        });
-        
-        // Update service health status
-        const service = serviceRegistry.getService(serviceName.toLowerCase());
-        if (service) {
-          serviceRegistry.services.set(serviceName.toLowerCase(), {
-            ...service,
-            healthy: false,
-            lastError: err.message,
-            lastCheck: new Date()
-          });
-        }
-        
-        if (!res.headersSent) {
-          res.status(503).json({
-            success: false,
-            error: 'Service temporarily unavailable',
-            service: serviceName,
-            code: 'SERVICE_PROXY_ERROR',
-            message: err.code === 'ECONNREFUSED' ? 'Service is down' : err.message,
-            timestamp: new Date().toISOString(),
-            retryAfter: 30
-          });
-        }
-      }
-    });
-
-    // Use the proxy middleware
-    proxy(req, res, next);
+    logger.info(`✅ ${serviceName} healthy. Forwarding request ${req.method} ${req.originalUrl}`);
+    
+    // Call the single proxy middleware
+    proxyMiddleware(req, res, next);
   };
 }
 
