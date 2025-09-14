@@ -10,7 +10,7 @@ function createServiceProxy(serviceName, targetUrl) {
     target: targetUrl,
     changeOrigin: true,
     secure: false,
-    timeout: 30000,
+    timeout: 10000,
     logLevel: 'debug',
     // Ensure that when mounted under '/api', we remove either '/api/<service>' or '/<service>'
     pathRewrite: (path, req) => {
@@ -32,15 +32,6 @@ function createServiceProxy(serviceName, targetUrl) {
     },
     onError: (err, req, res) => {
       logger.error(`❌ Proxy error for ${serviceName}: ${err.message}`);
-      const service = serviceRegistry.getService(serviceName.toLowerCase());
-      if (service) {
-        serviceRegistry.services.set(serviceName.toLowerCase(), {
-          ...service,
-          healthy: false,
-          lastError: err.message,
-          lastCheck: new Date()
-        });
-      }
       if (!res.headersSent) {
         res.status(503).json({
           success: false,
@@ -55,7 +46,7 @@ function createServiceProxy(serviceName, targetUrl) {
 
   // Return the actual request handler
   return (req, res, next) => {
-    if (!serviceRegistry.isServiceHealthy(serviceName.toLowerCase())) {
+    if (!serviceRegistry.isServiceHealthy(serviceName)) {
       logger.warn(`⚠️ ${serviceName} is unhealthy. Request rejected.`);
       return res.status(503).json({
         success: false,
