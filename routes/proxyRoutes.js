@@ -6,7 +6,7 @@ import { authLimiter, strictLimiter, authenticateToken, optionalAuth } from '../
 
 const router = express.Router();
 
-// Auth service routes (with stricter rate limiting)
+// Auth service routes (with rate limiting)
 router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 
 // Protected routes (require authentication)
@@ -24,3 +24,4 @@ router.use('/itinerary', createServiceProxy('ITINERARY', services.itinerary.url)
 router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
 
 export default router;
+
