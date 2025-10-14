@@ -41,6 +41,11 @@ export const services = {
         url: process.env.BOOKING_SERVICE_URL || 'http://localhost:3009',
         timeout: 5000,
         retries: 3
+    },
+    listing: {
+        url: process.env.LISTING_SERVICE_URL || 'http://localhost:3010',
+        timeout: 5000,
+        retries: 3
     }
 };
 

@@ -20,5 +20,7 @@ router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.ur
 
 // Public routes
 router.use('/itinerary', createServiceProxy('ITINERARY', services.itinerary.url));
+// Listing routes (mostly public; may use optional auth for personalization later)
+router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
 
 export default router;
