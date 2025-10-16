@@ -16,12 +16,20 @@ function createServiceProxy(serviceName, targetUrl) {
     pathRewrite: (path, req) => {
       const lower = serviceName.toLowerCase();
       const prefixes = [`/api/${lower}`, `/${lower}`];
+      
+      console.log(`\n🔄 PathRewrite for ${serviceName}:`);
+      console.log(`   Original path: ${path}`);
+      
       for (const p of prefixes) {
         if (path.startsWith(p)) {
           const rewritten = path.replace(p, '') || '/';
+          console.log(`   Matched prefix: ${p}`);
+          console.log(`   Rewritten path: ${rewritten}\n`);
           return rewritten;
         }
       }
+      
+      console.log(`   No prefix matched, returning original: ${path}\n`);
       return path;
     },
     onProxyReq: (proxyReq, req) => {
