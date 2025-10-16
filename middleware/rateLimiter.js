@@ -20,11 +20,11 @@ const createRateLimiter = (windowMs, max, message) => {
 
 // Different rate limits for different endpoints
 const generalLimiter = createRateLimiter();
-const authLimiter = createRateLimiter(900000, 5, {
+const authLimiter = createRateLimiter(900000, 1000, {
   error: 'Too many authentication attempts',
   code: 'AUTH_RATE_LIMIT_EXCEEDED'
 });
-const strictLimiter = createRateLimiter(900000, 10, {
+const strictLimiter = createRateLimiter(900000, 1000, {
   error: 'Rate limit exceeded for this endpoint',
   code: 'STRICT_RATE_LIMIT_EXCEEDED'
 });
