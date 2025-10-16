@@ -12,15 +12,24 @@ function createServiceProxy(serviceName, targetUrl) {
     secure: false,
     timeout: 30000,
     logLevel: 'debug',
-    // Ensure that when mounted under '/api', we remove either '/api/<service>' or '/<service>'
+    // Ensure correct stripping of the service prefix. Use originalUrl to avoid double-stripping
+    // when routers are nested (e.g., app.use('/api', router) and router.use('/guide', ...)).
     pathRewrite: (path, req) => {
       const lower = serviceName.toLowerCase();
-      const prefixes = [`/api/${lower}`, `/${lower}`];
-      for (const p of prefixes) {
-        if (path.startsWith(p)) {
-          const rewritten = path.replace(p, '') || '/';
-          return rewritten;
-        }
+      const originalPath = req.originalUrl || path;
+      const apiPrefix = `/api/${lower}`;
+
+      // If coming via /api/<service>/..., strip that prefix from originalUrl
+      if (originalPath.startsWith(apiPrefix)) {
+        const rewritten = originalPath.slice(apiPrefix.length) || '/';
+        return rewritten;
+      }
+
+      // Otherwise, if directly mounted at /<service>, strip that from the current path
+      const directPrefix = `/${lower}`;
+      if (path.startsWith(directPrefix)) {
+        const rewritten = path.slice(directPrefix.length) || '/';
+        return rewritten;
       }
       return path;
     },
