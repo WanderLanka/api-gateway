@@ -6,5 +6,5 @@ export default cors({
   origin: corsConfig.origins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Type']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Type', 'x-platform']
 });
