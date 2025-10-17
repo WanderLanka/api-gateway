@@ -62,7 +62,8 @@ export const cors = {
 };
 
 export const security = {
-    jwtSecret: process.env.JWT_SECRET || 'fallback-secret',
+    // IMPORTANT: Must match user-service JWT secret so the gateway can verify tokens
+    jwtSecret: process.env.JWT_SECRET || 'fallback-secret-key',
     rateLimit: {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
         max: parseInt(process.env.RATE_LIMIT_MAX) || 100

@@ -7,6 +7,7 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    req.logger?.warn?.('AUTH: Missing token');
     return res.status(401).json({ 
       error: 'Access token required',
       code: 'AUTH_TOKEN_MISSING'
@@ -15,6 +16,8 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, security.jwtSecret, (err, user) => {
     if (err) {
+      const reason = err.name === 'TokenExpiredError' ? 'expired' : 'invalid';
+      req.logger?.warn?.(`AUTH: Token ${reason}: ${err.message}`);
       return res.status(403).json({ 
         error: 'Invalid or expired token',
         code: 'AUTH_TOKEN_INVALID'
