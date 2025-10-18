@@ -13,25 +13,13 @@ function createServiceProxy(serviceName, targetUrl) {
     timeout: 10000,
     logLevel: 'debug',
     // Ensure that when mounted under '/api', we remove either '/api/<service>' or '/<service>'
-    pathRewrite: (path, req) => {
-      const lower = serviceName.toLowerCase();
-      const prefixes = [`/api/${lower}`, `/${lower}`];
-      
-      console.log(`\n🔄 PathRewrite for ${serviceName}:`);
-      console.log(`   Original path: ${path}`);
-      
-      for (const p of prefixes) {
-        if (path.startsWith(p)) {
-          const rewritten = path.replace(p, '') || '/';
-          console.log(`   Matched prefix: ${p}`);
-          console.log(`   Rewritten path: ${rewritten}\n`);
-          return rewritten;
-        }
-      }
-      
-      console.log(`   No prefix matched, returning original: ${path}\n`);
-      return path;
-    },
+    // Remove only the service prefix (e.g., /api/accommodation)
+  const servicePrefix = `/api/${serviceName.toLowerCase()}`;
+  if (path.startsWith(servicePrefix)) {
+    return path.replace(servicePrefix, '') || '/';
+  }
+  return path; // forward as-is if no match
+},
     onProxyReq: (proxyReq, req) => {
       logger.info(`📤Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
     },
