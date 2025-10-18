@@ -56,7 +56,9 @@ export const services = {
 
 export const cors = {
     origins: [
+        // support both common frontend dev ports; WEB_APP_URL can override
         process.env.WEB_APP_URL || 'http://localhost:5173',
+        process.env.WEB_APP_URL_5174 || 'http://localhost:5174',
         process.env.MOBILE_APP_URL_1 || 'http://192.168.8.159:8081',
         `exp://${process.env.MOBILE_APP_URL_1?.replace('http://', '') || '192.168.8.159:8081'}`,
         process.env.MOBILE_APP_URL_2 || 'http://10.21.136.103:8081',
