@@ -12,7 +12,7 @@ function createServiceProxy(serviceName, targetUrl) {
     secure: false,
     timeout: 10000,
     logLevel: 'debug',
-
+    
     // Express router already stripped /api/{service}, so path should be ready to forward
     pathRewrite: (path, req) => {
   // Remove only the service prefix (e.g., /api/accommodation)
