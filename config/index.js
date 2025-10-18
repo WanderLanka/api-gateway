@@ -23,7 +23,7 @@ export const services = {
         retries: 3
     },
     itinerary: {
-        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3004',
+        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3008',
         timeout: 5000,
         retries: 3
     },
