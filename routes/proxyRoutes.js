@@ -1,8 +1,9 @@
+import { authLimiter, authenticateToken, optionalAuth, strictLimiter } from '../middleware/index.js';
+
+import createServiceProxy from '../proxy/createServiceProxy.js';
 // routes/proxyRoutes.js
 import express from 'express';
-import createServiceProxy from '../proxy/createServiceProxy.js';
 import { services } from '../config/index.js';
-import { authLimiter, strictLimiter, authenticateToken, optionalAuth } from '../middleware/index.js';
 
 const router = express.Router();
 
@@ -17,6 +18,9 @@ router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAY
 router.use('/transport', optionalAuth, createServiceProxy('TRANSPORT', services.transport.url));
 router.use('/accommodation', optionalAuth, createServiceProxy('ACCOMMODATION', services.accommodation.url));
 router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.url));
+
+// Community service routes (optional auth for viewing, required for posting)
+router.use('/community', optionalAuth, createServiceProxy('COMMUNITY', services.community.url));
 
 // Public routes
 router.use('/itinerary', createServiceProxy('ITINERARY', services.itinerary.url));

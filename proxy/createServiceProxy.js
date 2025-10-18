@@ -14,10 +14,22 @@ function createServiceProxy(serviceName, targetUrl) {
     logLevel: 'debug',
     // Express router already stripped /api/{service}, so path should be ready to forward
     pathRewrite: (path, req) => {
-      console.log(`🔍 [PROXY DEBUG] Received path after router: "${path}" for service: "${serviceName}"`);
-      console.log(`🔍 [PROXY DEBUG] Forwarding path unchanged: "${path}"`);
+      const lower = serviceName.toLowerCase();
+      const prefixes = [`/api/${lower}`, `/${lower}`];
       
-      // Path is already clean after Express router stripping, forward as-is
+      console.log(`\n🔄 PathRewrite for ${serviceName}:`);
+      console.log(`   Original path: ${path}`);
+      
+      for (const p of prefixes) {
+        if (path.startsWith(p)) {
+          const rewritten = path.replace(p, '') || '/';
+          console.log(`   Matched prefix: ${p}`);
+          console.log(`   Rewritten path: ${rewritten}\n`);
+          return rewritten;
+        }
+      }
+      
+      console.log(`No prefix matched, returning original: ${path}\n`);
       return path;
     },
     onProxyReq: (proxyReq, req) => {
