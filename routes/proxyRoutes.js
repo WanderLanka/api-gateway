@@ -22,8 +22,13 @@ router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.ur
 // Community service routes (optional auth for viewing, required for posting)
 router.use('/community', optionalAuth, createServiceProxy('COMMUNITY', services.community.url));
 
+// Itinerary service routes (optional auth for place search, required for CRUD operations)
+router.use('/itinerary', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
+
+// Route calculation routes (part of itinerary service, let itinerary service handle auth)
+router.use('/routes', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
+
 // Public routes
-router.use('/itinerary', createServiceProxy('ITINERARY', services.itinerary.url));
 // Listing routes (mostly public; may use optional auth for personalization later)
 router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
 
