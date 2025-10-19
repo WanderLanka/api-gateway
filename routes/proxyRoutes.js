@@ -1,9 +1,8 @@
-import { authLimiter, authenticateToken, optionalAuth, strictLimiter } from '../middleware/index.js';
-
-import createServiceProxy from '../proxy/createServiceProxy.js';
 // routes/proxyRoutes.js
 import express from 'express';
+import createServiceProxy from '../proxy/createServiceProxy.js';
 import { services } from '../config/index.js';
+import { authLimiter, strictLimiter, authenticateToken, optionalAuth } from '../middleware/index.js';
 
 const router = express.Router();
 
@@ -12,13 +11,14 @@ router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 
 // Protected routes (require authentication)
 router.use('/booking', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
+router.use('/bookings', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
+router.use('/bookings/userBookings', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
 router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAYMENT', services.payment.url));
 
 // Semi-protected routes (optional authentication)
 router.use('/transport', optionalAuth, createServiceProxy('TRANSPORT', services.transport.url));
 router.use('/accommodation', optionalAuth, createServiceProxy('ACCOMMODATION', services.accommodation.url));
 router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.url));
-
 // Community service routes (optional auth for viewing, required for posting)
 router.use('/community', optionalAuth, createServiceProxy('COMMUNITY', services.community.url));
 
@@ -30,6 +30,7 @@ router.use('/routes', optionalAuth, (req, res, next) => {
 }, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // Itinerary service routes (optional auth for place search, required for CRUD operations)
+
 router.use('/itinerary', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // My Trips routes (requires authentication, part of itinerary service)
@@ -41,8 +42,5 @@ router.use('/my-trips', optionalAuth, (req, res, next) => {
 }, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // Public routes
-// Listing routes (mostly public; may use optional auth for personalization later)
-router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
-
 export default router;
 
