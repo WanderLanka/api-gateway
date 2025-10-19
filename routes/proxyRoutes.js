@@ -19,14 +19,27 @@ router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAY
 router.use('/transport', optionalAuth, createServiceProxy('TRANSPORT', services.transport.url));
 router.use('/accommodation', optionalAuth, createServiceProxy('ACCOMMODATION', services.accommodation.url));
 router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.url));
-
-// Public routes
-router.use('/itinerary', createServiceProxy('ITINERARY', services.itinerary.url));
-// Listing routes (mostly public; may use optional auth for personalization lat// Itinerary service routes (optional auth for place search, required for CRUD operations)
-router.use('/itinerary', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
+// Community service routes (optional auth for viewing, required for posting)
+router.use('/community', optionalAuth, createServiceProxy('COMMUNITY', services.community.url));
 
 // Route calculation routes (part of itinerary service, let itinerary service handle auth)
-router.use('/routes', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
+// MUST be defined BEFORE /itinerary to avoid path conflicts
+router.use('/routes', optionalAuth, (req, res, next) => {
+  req.url = '/routes' + req.url;
+  next();
+}, createServiceProxy('ITINERARY', services.itinerary.url));
+
+// Itinerary service routes (optional auth for place search, required for CRUD operations)
+
+router.use('/itinerary', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
+
+// My Trips routes (requires authentication, part of itinerary service)
+// Using optionalAuth since the itinerary service handles authentication internally
+// Need to restore /my-trips prefix that Express strips
+router.use('/my-trips', optionalAuth, (req, res, next) => {
+  req.url = '/my-trips' + req.url;
+  next();
+}, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // Public routes
 export default router;
