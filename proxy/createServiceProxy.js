@@ -23,10 +23,27 @@ function createServiceProxy(serviceName, targetUrl) {
   return path; // forward as-is if no match
 },
     onProxyReq: (proxyReq, req) => {
-      logger.info(`📤Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
+      logger.info(`📤 Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
+      logger.info(`📤 Request details:`, {
+        originalUrl: req.originalUrl,
+        targetUrl: targetUrl + proxyReq.path,
+        headers: {
+          authorization: req.headers.authorization ? 'Present' : 'Missing',
+          'content-type': req.headers['content-type'],
+          'x-platform': req.headers['x-platform']
+        },
+        user: req.user ? req.user.userId : 'No user attached'
+      });
     },
-    onProxyRes: (proxyRes) => {
-      logger.info(`📥 Response ${proxyRes.statusCode} from ${serviceName}`);
+    onProxyRes: (proxyRes, req) => {
+      logger.info(`📥 Response ${proxyRes.statusCode} from ${serviceName} for ${req.method} ${req.originalUrl}`);
+      if (proxyRes.statusCode >= 400) {
+        logger.error(`❌ Error response from ${serviceName}:`, {
+          status: proxyRes.statusCode,
+          statusText: proxyRes.statusMessage,
+          url: req.originalUrl
+        });
+      }
     },
     onError: (err, req, res) => {
       logger.error(`❌ Proxy error for ${serviceName}: ${err.message}`);
