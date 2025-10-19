@@ -10,28 +10,18 @@ function createServiceProxy(serviceName, targetUrl) {
     target: targetUrl,
     changeOrigin: true,
     secure: false,
-    timeout: 30000,
+    timeout: 10000,
     logLevel: 'debug',
-    // Ensure that when mounted under '/api', we remove either '/api/<service>' or '/<service>'
+    
+    // Express router already stripped /api/{service}, so path should be ready to forward
     pathRewrite: (path, req) => {
-      const lower = serviceName.toLowerCase();
-      const prefixes = [`/api/${lower}`, `/${lower}`];
-      
-      console.log(`\n🔄 PathRewrite for ${serviceName}:`);
-      console.log(`   Original path: ${path}`);
-      
-      for (const p of prefixes) {
-        if (path.startsWith(p)) {
-          const rewritten = path.replace(p, '') || '/';
-          console.log(`   Matched prefix: ${p}`);
-          console.log(`   Rewritten path: ${rewritten}\n`);
-          return rewritten;
-        }
-      }
-      
-      console.log(`   No prefix matched, returning original: ${path}\n`);
-      return path;
-    },
+  // Remove only the service prefix (e.g., /api/accommodation)
+  const servicePrefix = `/api/${serviceName.toLowerCase()}`;
+  if (path.startsWith(servicePrefix)) {
+    return path.replace(servicePrefix, '') || '/';
+  }
+  return path; // forward as-is if no match
+},
     onProxyReq: (proxyReq, req) => {
       logger.info(`📤Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
     },
@@ -40,15 +30,6 @@ function createServiceProxy(serviceName, targetUrl) {
     },
     onError: (err, req, res) => {
       logger.error(`❌ Proxy error for ${serviceName}: ${err.message}`);
-      const service = serviceRegistry.getService(serviceName.toLowerCase());
-      if (service) {
-        serviceRegistry.services.set(serviceName.toLowerCase(), {
-          ...service,
-          healthy: false,
-          lastError: err.message,
-          lastCheck: new Date()
-        });
-      }
       if (!res.headersSent) {
         res.status(503).json({
           success: false,
@@ -63,7 +44,7 @@ function createServiceProxy(serviceName, targetUrl) {
 
   // Return the actual request handler
   return (req, res, next) => {
-    if (!serviceRegistry.isServiceHealthy(serviceName.toLowerCase())) {
+    if (!serviceRegistry.isServiceHealthy(serviceName)) {
       logger.warn(`⚠️ ${serviceName} is unhealthy. Request rejected.`);
       return res.status(503).json({
         success: false,
