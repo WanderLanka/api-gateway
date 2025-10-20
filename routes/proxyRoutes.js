@@ -12,7 +12,6 @@ router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 // Protected routes (require authentication)
 router.use('/booking', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
 router.use('/bookings', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
-router.use('/bookings/userBookings', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
 router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAYMENT', services.payment.url));
 
 // Semi-protected routes (optional authentication)
