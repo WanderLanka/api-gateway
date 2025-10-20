@@ -23,7 +23,7 @@ export const services = {
         retries: 3
     },
     itinerary: {
-        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3004',
+        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3008',
         timeout: 5000,
         retries: 3
     },
@@ -69,7 +69,9 @@ export const cors = {
 };
 
 export const security = {
+
     // Align with user-service default to avoid token verification mismatch
+
     jwtSecret: process.env.JWT_SECRET || 'fallback-secret-key',
     rateLimit: {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,

@@ -12,20 +12,39 @@ function createServiceProxy(serviceName, targetUrl) {
     secure: false,
     timeout: 10000,
     logLevel: 'debug',
-    // Ensure that when mounted under '/api', we remove either '/api/<service>' or '/<service>'
+    
+    // Express router already stripped /api/{service}, so path should be ready to forward
     pathRewrite: (path, req) => {
-      // Remove only the service prefix (e.g., /api/accommodation)
-      const servicePrefix = `/api/${serviceName.toLowerCase()}`;
-      if (path.startsWith(servicePrefix)) {
-        return path.replace(servicePrefix, '') || '/';
-      }
-      return path; // forward as-is if no match
-    },
+
+  // Remove only the service prefix (e.g., /api/accommodation)
+  const servicePrefix = `/api/${serviceName.toLowerCase()}`;
+  if (path.startsWith(servicePrefix)) {
+    return path.replace(servicePrefix, '') || '/';
+  }
+  return path; // forward as-is if no match
+},
     onProxyReq: (proxyReq, req) => {
       logger.info(`📤 Forwarding ${req.method} ${req.originalUrl} → ${serviceName} (sent path: ${proxyReq.path})`);
+      logger.info(`📤 Request details:`, {
+        originalUrl: req.originalUrl,
+        targetUrl: targetUrl + proxyReq.path,
+        headers: {
+          authorization: req.headers.authorization ? 'Present' : 'Missing',
+          'content-type': req.headers['content-type'],
+          'x-platform': req.headers['x-platform']
+        },
+        user: req.user ? req.user.userId : 'No user attached'
+      });
     },
-    onProxyRes: (proxyRes) => {
-      logger.info(`📥 Response ${proxyRes.statusCode} from ${serviceName}`);
+    onProxyRes: (proxyRes, req) => {
+      logger.info(`📥 Response ${proxyRes.statusCode} from ${serviceName} for ${req.method} ${req.originalUrl}`);
+      if (proxyRes.statusCode >= 400) {
+        logger.error(`❌ Error response from ${serviceName}:`, {
+          status: proxyRes.statusCode,
+          statusText: proxyRes.statusMessage,
+          url: req.originalUrl
+        });
+      }
     },
     onError: (err, req, res) => {
       logger.error(`❌ Proxy error for ${serviceName}: ${err.message}`);
