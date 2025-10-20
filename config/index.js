@@ -69,7 +69,8 @@ export const cors = {
 };
 
 export const security = {
-    jwtSecret: process.env.JWT_SECRET || 'fallback-secret',
+    // Align with user-service default to avoid token verification mismatch
+    jwtSecret: process.env.JWT_SECRET || 'fallback-secret-key',
     rateLimit: {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
         max: parseInt(process.env.RATE_LIMIT_MAX) || 100
