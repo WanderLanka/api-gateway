@@ -8,7 +8,7 @@ export const server = {
 
 export const services = {
     auth: {
-        url: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+        url: process.env.AUTH_SERVICE_URL || 'http://localhost:3007',
         timeout: 5000,
         retries: 3
     },
@@ -69,6 +69,7 @@ export const cors = {
 };
 
 export const security = {
+    // IMPORTANT: Must match user-service JWT secret so the gateway can verify tokens
     jwtSecret: process.env.JWT_SECRET || 'fallback-secret-key',
     rateLimit: {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
