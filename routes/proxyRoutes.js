@@ -3,11 +3,19 @@ import { authLimiter, authenticateToken, optionalAuth, strictLimiter } from '../
 import createServiceProxy from '../proxy/createServiceProxy.js';
 // routes/proxyRoutes.js
 import express from 'express';
+import logger from '../utils/logger.js';
 import { services } from '../config/index.js';
 
 const router = express.Router();
 
+// Add debugging middleware
+router.use((req, res, next) => {
+  logger.info(`🔍 ProxyRoutes: ${req.method} ${req.originalUrl} → baseUrl: ${req.baseUrl}, path: ${req.path}`);
+  next();
+});
+
 // Auth service routes (with rate limiting)
+// This includes all auth and profile routes: /auth/*, /profile/*
 router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 
 // Protected routes (require authentication)

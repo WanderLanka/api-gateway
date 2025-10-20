@@ -10,7 +10,8 @@ function createServiceProxy(serviceName, targetUrl) {
     target: targetUrl,
     changeOrigin: true,
     secure: false,
-    timeout: 10000,
+    timeout: 300000, // 5 minutes for large file uploads
+    proxyTimeout: 300000, // 5 minutes
     logLevel: 'debug',
     
     // Express router already stripped /api/{service}, so path should be ready to forward
