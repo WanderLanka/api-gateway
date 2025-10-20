@@ -80,11 +80,11 @@ class ServiceRegistry {
   }
 
   getService(serviceName) {
-    return this.services.get(serviceName);
+    return this.services.get(serviceName.toLowerCase());
   }
 
   isServiceHealthy(serviceName) {
-    const service = this.services.get(serviceName);
+    const service = this.services.get(serviceName.toLowerCase());
     return service && service.healthy;
   }
 

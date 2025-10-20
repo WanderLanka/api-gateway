@@ -5,7 +5,7 @@ const requestLogger = (req, res, next) => {
   const start = Date.now();
   
   // Log incoming request
-  logger.info('Incoming request ❕', {
+  logger.info('Incoming request', {
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,

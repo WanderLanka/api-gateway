@@ -23,7 +23,7 @@ export const services = {
         retries: 3
     },
     itinerary: {
-        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3004',
+        url: process.env.ITINERARY_SERVICE_URL || 'http://localhost:3008',
         timeout: 5000,
         retries: 3
     },
@@ -46,12 +46,19 @@ export const services = {
         url: process.env.LISTING_SERVICE_URL || 'http://localhost:3010',
         timeout: 5000,
         retries: 3
+    },
+    community: {
+        url: process.env.COMMUNITY_SERVICE_URL || 'http://localhost:3007',
+        timeout: 10000, // Longer timeout for image uploads
+        retries: 2
     }
 };
 
 export const cors = {
     origins: [
+        // support both common frontend dev ports; WEB_APP_URL can override
         process.env.WEB_APP_URL || 'http://localhost:5173',
+        process.env.WEB_APP_URL_5174 || 'http://localhost:5174',
         process.env.MOBILE_APP_URL_1 || 'http://192.168.8.159:8081',
         `exp://${process.env.MOBILE_APP_URL_1?.replace('http://', '') || '192.168.8.159:8081'}`,
         process.env.MOBILE_APP_URL_2 || 'http://10.21.136.103:8081',
