@@ -12,7 +12,7 @@ router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 // Protected routes (require authentication)
 router.use('/booking', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
 router.use('/bookings', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
-router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAYMENT', services.payment.url));
+router.use('/payment', optionalAuth, createServiceProxy('PAYMENT', services.payment.url));
 
 // Semi-protected routes (optional authentication)
 router.use('/transport', optionalAuth, createServiceProxy('TRANSPORT', services.transport.url));
@@ -29,7 +29,7 @@ router.use('/routes', optionalAuth, (req, res, next) => {
 }, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // Itinerary service routes (optional auth for place search, required for CRUD operations)
-
+// Add debug logs to verify path rewriting and target forwarding
 router.use('/itinerary', optionalAuth, createServiceProxy('ITINERARY', services.itinerary.url));
 
 // My Trips routes (requires authentication, part of itinerary service)

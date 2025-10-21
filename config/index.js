@@ -33,7 +33,7 @@ export const services = {
         retries: 3
     },
     payment: {
-        url: process.env.PAYMENT_SERVICE_URL || 'http://localhost:3006',
+        url: process.env.PAYMENT_SERVICE_URL || 'http://localhost:3004',
         timeout: 5000,
         retries: 3
     },
