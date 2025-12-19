@@ -48,7 +48,7 @@ export const services = {
         retries: 3
     },
     community: {
-        url: process.env.COMMUNITY_SERVICE_URL || 'http://localhost:3007',
+        url: process.env.COMMUNITY_SERVICE_URL || 'http://localhost:3011',
         timeout: 10000, // Longer timeout for image uploads
         retries: 2
     }

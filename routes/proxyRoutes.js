@@ -33,6 +33,8 @@ router.use('/payment', authenticateToken, strictLimiter, createServiceProxy('PAY
 router.use('/transport', optionalAuth, createServiceProxy('TRANSPORT', services.transport.url));
 router.use('/accommodation', optionalAuth, createServiceProxy('ACCOMMODATION', services.accommodation.url));
 router.use('/guide', optionalAuth, createServiceProxy('GUIDE', services.guide.url));
+// Listing service routes (for tour guide listings, packages, etc.)
+router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
 // Community service routes (optional auth for viewing, required for posting)
 router.use('/community', optionalAuth, createServiceProxy('COMMUNITY', services.community.url));
 
