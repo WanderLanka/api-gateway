@@ -30,7 +30,7 @@ class ServiceRegistry {
       const response = await axios.get(`${serviceConfig.url}/health`, {
         timeout: 5000
       });
-      
+
       if (response.status === 200) {
         const wasUnhealthy = !serviceConfig.healthy;
         this.services.set(serviceName, {
@@ -39,7 +39,7 @@ class ServiceRegistry {
           lastCheck: new Date(),
           consecutiveFailures: 0
         });
-        
+
         if (wasUnhealthy) {
           logger.info(`Service ${serviceName} is back online ♻♻♻`);
         }
@@ -48,7 +48,7 @@ class ServiceRegistry {
     } catch (error) {
       const currentService = this.services.get(serviceName);
       const consecutiveFailures = (currentService?.consecutiveFailures || 0) + 1;
-      
+
       this.services.set(serviceName, {
         ...serviceConfig,
         healthy: false,
@@ -56,7 +56,7 @@ class ServiceRegistry {
         consecutiveFailures,
         lastError: error.message
       });
-      
+
       if (consecutiveFailures === 1) {
         logger.warn(`Service ${serviceName} health check failed ❌:`, {
           error: error.message,
@@ -65,18 +65,19 @@ class ServiceRegistry {
       } else if (consecutiveFailures % 5 === 0) {
         logger.error(`Service ${serviceName} has failed ${consecutiveFailures} consecutive health checks`);
       }
-      
+
       return false;
     }
   }
 
   startHealthChecks() {
     logger.info('Starting health checks for all services ❕');
-    setInterval(async () => {
+    this.timer = setInterval(async () => {
       for (const [serviceName, serviceConfig] of this.services) {
         await this.checkServiceHealth(serviceName, serviceConfig);
       }
     }, this.healthCheckInterval);
+    this.timer.unref();
   }
 
   getService(serviceName) {

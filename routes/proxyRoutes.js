@@ -8,7 +8,6 @@ import { authLimiter, strictLimiter, authenticateToken, optionalAuth } from '../
 const router = express.Router();
 
 // Auth service routes (with stricter rate limiting), but allow a little more for refresh
-router.use('/auth/refresh', createServiceProxy('AUTH', services.auth.url));
 // Add debugging middleware
 router.use((req, res, next) => {
   logger.info(`🔍 ProxyRoutes: ${req.method} ${req.originalUrl} → baseUrl: ${req.baseUrl}, path: ${req.path}`);
@@ -22,7 +21,6 @@ router.use('/auth', authLimiter, createServiceProxy('AUTH', services.auth.url));
 // Protected routes (require authentication)
 // Allow public/semi-protected access for specific read-only booking endpoints first
 // List tour package bookings (reads only); downstream service still enforces filtering
-router.use('/booking/tourpackage_booking/list', optionalAuth, createServiceProxy('BOOKING', services.booking.url));
 
 // All other booking routes require authentication
 router.use('/booking', authenticateToken, createServiceProxy('BOOKING', services.booking.url));
@@ -54,6 +52,8 @@ router.use('/my-trips', optionalAuth, (req, res, next) => {
   req.url = '/my-trips' + req.url;
   next();
 }, createServiceProxy('ITINERARY', services.itinerary.url));
+
+router.use('/listing', optionalAuth, createServiceProxy('LISTING', services.listing.url));
 
 // Public routes
 export default router;

@@ -8,7 +8,7 @@ export const server = {
 
 export const services = {
     auth: {
-        url: process.env.AUTH_SERVICE_URL || 'http://localhost:3007',
+        url: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
         timeout: 5000,
         retries: 3
     },
